@@ -8,7 +8,9 @@
 
 **业务产物是可追溯的数据版本，不是聊天应用，也不等于已经证明提升了模型质量。** 本项目与其他项目使用独立目录、DuckDB、Docker 网络及数据卷。
 
-当前实现为 `0.2.0 / recipe_v2`。真实六分片处理、测试与审计结果见 [实测记录](VALIDATION.md)，其中按规则版本区分历史与当前结果。`recipe_v1` 的 5,570 条重复正文和 16 对审计候选属于旧版实测，不能直接用作 v2 成绩。旧版源码保存在 [`baseline-v1`](https://github.com/CedricGrey777/wiki-corpus-pipeline/tree/baseline-v1) 标签。
+当前实现为 `0.2.0 / recipe_v2`。2026-11-02 通过 Airflow 完成六分片全量运行：处理 **1,384,748** 条输入，移除 **5,570** 条重复正文，发布 **1,379,178** 篇文章为 READY；**35 项**完整测试通过，抽样 2,000 篇得到 **16 对待人工复核候选**。具体环境、统计口径与聚合证据见 [实测记录](VALIDATION.md)及 [v2 发布报告](evidence/2026-11-02/release-v2.json)。
+
+实测记录按规则版本区分当前与历史结果。虽然 v2 与 v1 的重复正文总数相同，规范化正文及 train/validation 划分已经变化，不能据数量相同推断清洗没有生效。旧版源码保存在 [`baseline-v1`](https://github.com/CedricGrey777/wiki-corpus-pipeline/tree/baseline-v1) 标签。
 
 ## 运行环境
 
@@ -184,7 +186,7 @@ docker compose run --rm --no-deps --entrypoint python cli -m pytest -q
 
 覆盖：有限宽度转换、控制字符与保留字符、缩进/NFC、清洗幂等、语言阈值与无字母文本、标记不删文、缺字段隔离、哈希碰撞不能合并不同正文、跨批冲突、清洗复用、版本隔离与旧 READY 读取、改名/事务边界失败恢复、READY 消费门槛、40 对真实 Spark MinHash 合成测试、物理行序颠倒但 10k 样本不变。
 
-[GitHub Actions](https://github.com/CedricGrey777/wiki-corpus-pipeline/actions/workflows/ci.yml) 在 push、pull request 和手动触发时使用 Ubuntu 24.04 构建同一 Docker 镜像，执行聚焦/完整测试及独立临时目录中的 CLI 演示与 READY 检查。CI 仅使用合成数据，不下载 Wikipedia，也不运行全量性能实验；下载镜像和安装依赖仍需要网络。
+[GitHub Actions](https://github.com/CedricGrey777/wiki-corpus-pipeline/actions/workflows/ci.yml) 在分支 push 或 pull request 涉及源码、测试、DAG、依赖配置、Docker 构建配置或工作流时触发，也支持手动触发。仅修改文档或证据不会自动重跑。工作流使用 Ubuntu 24.04 构建同一 Docker 镜像，执行聚焦/完整测试及独立临时目录中的 CLI 演示与 READY 检查。CI 仅使用合成数据，不下载 Wikipedia，也不运行全量性能实验；下载镜像和安装依赖仍需要网络。
 
 固定10万条、`local[1]` / `local[2]`各三次的辅助性能实验：
 
