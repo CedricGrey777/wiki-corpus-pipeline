@@ -1,4 +1,17 @@
-# 实测记录：2026-09-09
+# 实测记录
+
+## 2026-11-02：recipe_v2 本地验证
+
+- 合同测试：[20 passed in 0.88s](evidence/2026-11-02/contracts.txt)。
+- 新规则 Spark 聚焦测试：[1 passed in 8.88s](evidence/2026-11-02/v2-focused.txt)。
+- 完整测试：[35 passed in 22.24s](evidence/2026-11-02/tests.txt)，使用真实 Spark/JVM。
+- [独立临时目录 CLI 演示](evidence/2026-11-02/cli-demo.txt)：9 条输入，2 条隔离、1 条源重复、2 条正文精确重复，4 条保留，发布状态 READY。
+- v2 镜像 `python -m pip check` 无依赖冲突。
+- 六分片全量 Airflow 运行 `verify_wiki_v2_full_20261102` 已提交；完成后在此记录新版真实结果，不沿用旧版数字。
+
+## 2026-09-09：recipe_v1 历史实测
+
+2026-11-02 已核对旧版 READY 清单与账本身份，并导出原审计和性能报告的聚合内容，见 [历史 v1 证据](evidence/2026-11-02/historical-v1.json)。下列性能、数量和候选结果来自旧规则；本轮没有重跑旧版性能实验。
 
 数据与完整账本保存在 Docker 卷 `wiki-corpus-pipeline_corpus-data`。本文件只记录聚合结果，不包含 Wikipedia 原文。
 

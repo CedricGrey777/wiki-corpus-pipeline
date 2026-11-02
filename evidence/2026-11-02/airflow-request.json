@@ -1,0 +1,48 @@
+{
+  "dag_run_id": "verify_wiki_v2_full_20261102",
+  "dag_id": "wiki_corpus_release",
+  "logical_date": null,
+  "queued_at": "2026-11-02T07:20:40.018207Z",
+  "start_date": null,
+  "end_date": null,
+  "duration": null,
+  "data_interval_start": null,
+  "data_interval_end": null,
+  "run_after": "2026-11-02T07:20:40.012113Z",
+  "last_scheduling_decision": null,
+  "run_type": "manual",
+  "state": "queued",
+  "triggered_by": "rest_api",
+  "triggering_user_name": "Anonymous",
+  "conf": {
+    "source_kind": "wikimedia",
+    "scope": "full",
+    "run_audit": true,
+    "release_id": "wiki-full-v2-20261102",
+    "shards": [
+      "train-00000-of-00006.parquet",
+      "train-00001-of-00006.parquet",
+      "train-00002-of-00006.parquet",
+      "train-00003-of-00006.parquet",
+      "train-00004-of-00006.parquet",
+      "train-00005-of-00006.parquet"
+    ]
+  },
+  "note": null,
+  "dag_versions": [
+    {
+      "id": "01a19b21-76e4-7d74-856d-a7b90fbce4c5",
+      "version_number": 2,
+      "dag_id": "wiki_corpus_release",
+      "bundle_name": "dags-folder",
+      "bundle_version": null,
+      "created_at": "2026-11-02T07:20:24.036639Z",
+      "dag_display_name": "wiki_corpus_release",
+      "bundle_url": null
+    }
+  ],
+  "bundle_version": null,
+  "dag_display_name": "wiki_corpus_release",
+  "partition_key": null,
+  "partition_date": null
+}

@@ -1,0 +1,4 @@
+ Container wiki-corpus-pipeline-cli-run-58be37ed2246 Creating
+ Container wiki-corpus-pipeline-cli-run-58be37ed2246 Created
+...................................                                      [100%]
+35 passed in 22.24s

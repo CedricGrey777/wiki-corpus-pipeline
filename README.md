@@ -1,10 +1,14 @@
-# 中文训练语料质量与版本发布流水线
+# 中文训练语料质量治理与版本发布流水线
 
-一个独立、单机可复现的数据工程项目。借鉴 Data-Juicer 的处理与去重设计，自行实现文件批次、保守清洗、正文精确去重、质量账本、不可变版本发布和中断恢复。不运行完整 Data-Juicer，不依赖 Ray、GPU、模型 API、对象存储或爬虫。
+[![CI](https://github.com/CedricGrey777/wiki-corpus-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/CedricGrey777/wiki-corpus-pipeline/actions/workflows/ci.yml)
+
+一个独立、单机可复现的数据工程项目。借鉴 Data-Juicer 的处理与去重设计，自行实现文件批次、文本规范化、正文精确去重、质量账本、不可变版本发布和中断恢复。不运行完整 Data-Juicer，不依赖 Ray、GPU、模型 API、对象存储或爬虫。
+
+**English overview:** A reproducible Chinese corpus pipeline built with PySpark, Airflow and DuckDB. It provides bounded Unicode normalization, explainable quality flags, cross-batch exact deduplication, deterministic train/validation splits, and immutable releases with recoverable READY registration. CI uses synthetic data; public Wikipedia text stays outside Git.
 
 **业务产物是可追溯的数据版本，不是聊天应用，也不等于已经证明提升了模型质量。** 本项目与其他项目使用独立目录、DuckDB、Docker 网络及数据卷。
 
-真实六分片处理、测试与审计结果见 [实测记录](VALIDATION.md)。
+当前实现为 `0.2.0 / recipe_v2`。真实六分片处理、测试与审计结果见 [实测记录](VALIDATION.md)，其中按规则版本区分历史与当前结果。`recipe_v1` 的 5,570 条重复正文和 16 对审计候选属于旧版实测，不能直接用作 v2 成绩。旧版源码保存在 [`baseline-v1`](https://github.com/CedricGrey777/wiki-corpus-pipeline/tree/baseline-v1) 标签。
 
 ## 运行环境
 
@@ -19,9 +23,9 @@
 下面只生成合成样本，不访问网络数据源、不调用 API。
 
 ```powershell
-docker compose build
+docker compose build cli
 docker compose run --rm --no-deps cli run-demo
-docker compose run --rm --no-deps cli inspect --release-id synthetic-r001
+docker compose run --rm --no-deps cli inspect --release-id synthetic-cli-v2
 ```
 
 合成测试集预期：9 条输入，2 条隔离，1 条源记录重复，2 条跨文章精确重复，保留 4 篇。重复执行同一命令复用相同批次和已发布版本，不追加重复记录。
@@ -43,9 +47,9 @@ docker compose run --rm --no-deps cli inspect --release-id synthetic-r001
 docker compose run --rm --no-deps cli make-fixtures
 docker compose run --rm --no-deps cli ingest-clean --input /opt/airflow/data/fixtures/synthetic-00.parquet --source-kind synthetic
 docker compose run --rm --no-deps cli ingest-clean --input /opt/airflow/data/fixtures/synthetic-01.parquet --source-kind synthetic
-docker compose run --rm --no-deps cli build-release --release-id synthetic-r002 --batches synthetic-synthetic-00-full-recipe_v1 synthetic-synthetic-01-full-recipe_v1
-docker compose run --rm --no-deps cli validate-publish --release-id synthetic-r002
-docker compose run --rm --no-deps cli audit-near-duplicates --release-id synthetic-r002
+docker compose run --rm --no-deps cli build-release --release-id synthetic-stages-v2 --batches synthetic-synthetic-00-full-recipe_v2 synthetic-synthetic-01-full-recipe_v2
+docker compose run --rm --no-deps cli validate-publish --release-id synthetic-stages-v2
+docker compose run --rm --no-deps cli audit-near-duplicates --release-id synthetic-stages-v2
 ```
 
 ## 固定公开数据：显式下载后再处理
@@ -54,13 +58,13 @@ docker compose run --rm --no-deps cli audit-near-duplicates --release-id synthet
 
 `5428a5d9ebb8d68732fc1227ebc5e8d5cec28592`
 
-[六分片目录](https://huggingface.co/datasets/wikimedia/wikipedia/tree/main/20231101.zh)中的文件名为 `train-00000-of-00006.parquet` 到 `train-00005-of-00006.parquet`。来源数据卡列出 1,384,748 行、约 1.72 GB 压缩下载；本项目的实际输入量、发布量与运行条件另见实测记录。先使用约 127 MB 的 `train-00002-of-00006.parquet`。
+[六分片目录](https://huggingface.co/datasets/wikimedia/wikipedia/tree/5428a5d9ebb8d68732fc1227ebc5e8d5cec28592/20231101.zh)中的文件名为 `train-00000-of-00006.parquet` 到 `train-00005-of-00006.parquet`。来源数据卡列出 1,384,748 行、约 1.72 GB 压缩下载；本项目的实际输入量、发布量与运行条件另见实测记录。先使用约 127 MB 的 `train-00002-of-00006.parquet`。
 
 ```powershell
 docker compose run --rm --no-deps cli download --shards train-00002-of-00006.parquet
 docker compose run --rm --no-deps cli ingest-clean --input /opt/airflow/data/raw/5428a5d9ebb8d68732fc1227ebc5e8d5cec28592/20231101.zh/train-00002-of-00006.parquet --scope 10k
-docker compose run --rm --no-deps cli build-release --release-id wiki-zh-10k-r001 --batches wikimedia-train-00002-of-00006-10k-recipe_v1
-docker compose run --rm --no-deps cli validate-publish --release-id wiki-zh-10k-r001
+docker compose run --rm --no-deps cli build-release --release-id wiki-zh-10k-v2 --batches wikimedia-train-00002-of-00006-10k-recipe_v2
+docker compose run --rm --no-deps cli validate-publish --release-id wiki-zh-10k-v2
 ```
 
 `10k`/`100k` 是**每个选定分片**按 `id,url,title,text` 的固定升序（null 在前）取前 N 行，不是随机抽样，也不代表全文主题分布。小样本迭代只选上述单分片；完整发布对六个分片都使用 `full`。六个文件是历史文件批次，不能称为真实实时增量或不同日期的文章更新。
@@ -75,21 +79,46 @@ docker compose run --rm --no-deps cli validate-publish --release-id wiki-zh-10k-
 
 ## 数据语义与边界
 
-```text
-固定源文件 → 分片清洗 / 隔离 → 累计精确去重 → 质量校验
-                                            ↓
-暂存目录 → 同文件系统 rename → DuckDB 事务登记 READY → 消费 / 审计
+```mermaid
+flowchart LR
+    A[固定源文件与来源清单] --> B[分片规范化与质量标记]
+    B --> Q[缺字段或空正文隔离]
+    B --> C[CLEANED 批次]
+    C --> D[累计正文精确去重与划分]
+    D --> E[暂存 Parquet 与 manifest]
+    E --> F[质量守恒验证]
+    F --> G[同文件系统 rename]
+    G --> H[DuckDB 事务登记 READY]
+    H --> I[消费与有限近重复审计]
 ```
 
 - 稳定文章 ID 为 `wikipedia:zh:<原始id>`。批次 ID 包含 source kind、分片名、scope、recipe version；manifest 另外锁定 source revision、文件 SHA-256 和 Python 实现指纹。
 - 必填字段 `id/url/title/text` 必须为字符串。缺列或类型错误使任务失败；行级缺值或空白正文隔离。隔离记录保留原文在本地，不写入普通任务日志。
-- 清洗只做 NFC、换行统一、删除行尾空白、压缩连续空白行。保留行首缩进、行内空格、繁简差异、大小写、标点与数学符号。
-- 长度 `<100`、`>100000` 和重复非空行比例 `>0.5` 只作审计标记，**不删除文章**。重复行比例为 `(非空行数－不同非空行数)/非空行数`，空行忽略、非空行内容按清洗后原样比较；阈值是审计起点，不是经过模型效果验证的质量门槛。
+- `recipe_v2` 按固定顺序统一 CRLF/CR 为 LF、有限宽度转换、NFC 规范化、控制字符清理、空白规范化。宽度转换仅覆盖全角 ASCII `U+FF01–FF5E` 和全角空格 `U+3000`，不进行全局 NFKC。删除 Unicode `Cc` 类控制字符但保留 LF 和制表符；删除行尾空格/制表符及首尾空白行，连续空白行压缩为一行。保留行首缩进、行内空格、繁简差异、大小写、数学符号、emoji 及 `Cf` 类字符（包括零宽连接符）；全角 ASCII 标点按已定义范围转为半角。
+- `quality_flags` 保存篇幅、格式和中文占比的规则标记，**不据此删除文章**。规则阈值是审计起点，不是模型效果验证后的质量门槛，也不判断语义完整性或可靠识别语言。
 - 同一文章 ID 的完全相同源记录计作源重复；同一 ID 的不同源记录阻止发布，不自动取最后一次写入。检查跨所选全部批次执行。
 - 精确去重按 `(SHA-256, clean_text)` 分组，核对正文相等，而非仅相信哈希相等。每组保留字典序最小的文章 ID，保留移除文章到代表文章的映射。
 - 内容哈希前 8 位转整数模 100，小于 5 的进入 validation，其余进入 train。比例是确定性交付规则，不保证小样本恰好 95/5。新增批次改变代表 ID 时，相同正文的 split 不变。
 - 只对新增分片执行清洗；发布时对累计已清洗分区重建去重快照。**不是完全增量去重、跨快照 CDC，也没有文章修订或删除语义。**
 - 相同 release ID 不允许对应不同输入/实现。规则或实现变更应升 `RECIPE` 版本、重清洗，并使用新 release ID；旧版本不覆盖。纯重跑不改规则。
+
+### 质量标记口径
+
+| 标记 | 计算规则 | 解释 |
+|---|---|---|
+| `short_text` / `long_text` | 清洗后字符数 `<100` / `>100000` | 篇幅异常提示，不证明内容不完整 |
+| `repeated_lines` | `(非空行数－不同非空行数)/非空行数 > 0.5` | 忽略空行，非空行按清洗后原样比较 |
+| `control_chars_removed` | 规范化过程中实际删除了 `Cc` 控制字符 | CRLF/CR 换行统一不算控制字符删除 |
+| `low_chinese_ratio` | 清洗后汉字数 / Unicode `L*` 类字母字符数 `<0.5` | 汉字按下述 UCD 名称判断；数字、标点和空白不计入分母 |
+| `language_undetermined` | Unicode `L*` 类字母字符数为 0 | 无法根据中文占比判断 |
+
+字母字符使用 Python 3.11 内置 [unicodedata](https://docs.python.org/3.11/library/unicodedata.html) 的类别 `L*`；汉字从这些字符中按 UCD 名称前缀 `CJK UNIFIED IDEOGRAPH-` 或 `CJK COMPATIBILITY IDEOGRAPH-` 识别，包括该运行时 Unicode 数据库支持的扩展区汉字。汉字也用于其他语言，因此中文占比只是规则审计指标，不是语言识别模型。
+
+规则标记保存在清洗分区和发布正文的现有列中。发布报告与 `quality_metrics` 的计数均针对精确去重后最终保留的代表文章：新增的 `control_chars_removed_count`、`low_chinese_ratio_count`、`language_undetermined_count` 不统计全部输入记录，也不合并被移除文章的标记。同一篇代表文章可命中多个标记，因此各类标记数不可直接相加当成文章总数。
+
+### 规则版本与历史结果
+
+v2 重新清洗源文件并使用新的 batch ID 和 release ID。构建阶段要求所有批次与当前规则及实现指纹一致，不能混用 v1/v2 批次。旧 READY 版本仍可通过 `inspect` / `read_ready()` 读取；旧版未完成任务应使用 `baseline-v1` 代码恢复。旧目录与旧账本记录不覆盖、不迁移。不同规则版本会改变正文及内容哈希，因此去重数量和 train/validation 划分可能变化；稳定划分的承诺适用于相同规范化正文。
 
 ### 发布恢复
 
@@ -132,7 +161,7 @@ docker compose up -d
 - `source_kind`: `synthetic` 或显式选择 `wikimedia`。
 - `shards`: 固定文件名列表，默认只选最小分片。
 - `scope`: `10k` / `100k` / `full`。
-- `release_id`: 此次不可变版本名。
+- `release_id`: 此次不可变版本名，默认 `synthetic-airflow-v2`，与 CLI 的 `synthetic-cli-v2` 分开。
 - `run_audit`: 默认 false，主线通过后可选择 true。
 
 任务依次调用真实 `prepare → ingest → build → publish → audit` 实现；仅用 XCom 传小清单，不传正文。单活动 DAG run、单活动任务、单 Spark JVM，DuckDB单写。IO失败可重试；数据规则错误重试不会自动修好，应先查明原因。
@@ -153,7 +182,9 @@ docker compose run --rm --no-deps --entrypoint python cli -m pytest -q tests/tes
 docker compose run --rm --no-deps --entrypoint python cli -m pytest -q
 ```
 
-覆盖：保留缩进/NFC、缺字段隔离、重复行审计不删除、哈希碰撞不能合并不同正文、跨批冲突、清洗复用、旧版本不变、改名/事务边界失败恢复、READY消费门槛、40对真实Spark MinHash合成测试、物理行序颠倒但10k样本不变。
+覆盖：有限宽度转换、控制字符与保留字符、缩进/NFC、清洗幂等、语言阈值与无字母文本、标记不删文、缺字段隔离、哈希碰撞不能合并不同正文、跨批冲突、清洗复用、版本隔离与旧 READY 读取、改名/事务边界失败恢复、READY 消费门槛、40 对真实 Spark MinHash 合成测试、物理行序颠倒但 10k 样本不变。
+
+[GitHub Actions](https://github.com/CedricGrey777/wiki-corpus-pipeline/actions/workflows/ci.yml) 在 push、pull request 和手动触发时使用 Ubuntu 24.04 构建同一 Docker 镜像，执行聚焦/完整测试及独立临时目录中的 CLI 演示与 READY 检查。CI 仅使用合成数据，不下载 Wikipedia，也不运行全量性能实验；下载镜像和安装依赖仍需要网络。
 
 固定10万条、`local[1]` / `local[2]`各三次的辅助性能实验：
 
@@ -172,3 +203,7 @@ docker compose run --rm --no-deps cli benchmark --input /opt/airflow/data/raw/54
 - [PySpark 3.5.9官方安装与依赖](https://spark.apache.org/docs/3.5.9/api/python/getting_started/install.html)。本项目PyArrow用于原生Parquet合成数据，不使用pandas-on-Spark/Arrow UDF。
 
 独立贡献是固定输入合同、确定性清洗、正文等值验证、跨批质量对账、READY发布/恢复及可复现实验。框架原有算子、原始公开语料、未执行的规模实验不属于个人成果。
+
+## 代码许可
+
+本项目代码采用 [MIT License](LICENSE)，版权归属 `2026 CedricGrey777`。第三方依赖遵循各自许可，Wikipedia 原文及其清洗结果不受本仓库 MIT 许可覆盖；数据来源和再分发边界见上文。

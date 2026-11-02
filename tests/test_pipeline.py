@@ -10,7 +10,7 @@ from corpus_pipeline.audit import candidate_pairs, run_synthetic_audit
 from corpus_pipeline.core import catalog, read_json, read_ready, write_json
 from corpus_pipeline.fixtures import create_fixtures, row, write_rows
 from corpus_pipeline.pipeline import build_release, ingest_clean, validate_directory, validate_publish
-from corpus_pipeline.transform import clean_frame, deduplicate, spark_session
+from corpus_pipeline.transform import clean_frame, content_split, deduplicate, spark_session, text_hash
 
 pytestmark = pytest.mark.spark
 
@@ -66,6 +66,50 @@ def test_real_spark_quality_and_exact_equality(prepared):
     assert [r[0] for r in rows] == ["wikipedia:zh:02", "wikipedia:zh:20", "wikipedia:zh:30", "wikipedia:zh:50"]
     assert rows[1][1].startswith("  if x:\n    print")
     assert rows[2][1].startswith("Café")
+
+
+def test_v2_audit_flags_deduplication_and_release_metrics(tmp_path, spark):
+    source = tmp_path / "v2-audit.parquet"
+    write_rows(source, [
+        row("01", "\x00ＡＢＣ\u3000Ｃａｆｅ\u0301"),
+        row("02", "ABC Café"),
+        row("03", "中文AB"),
+        row("04", "123!?👩\u200d💻"),
+        row("05", "\x00\x7f"),
+        row("06", "中文\r\n\t内容"),
+        row("07", "𠀀𰀀AB"),
+    ])
+    root = tmp_path / "warehouse"
+    batch = ingest_clean(root, source, source_kind="synthetic", spark=spark)["batch_id"]
+    release = validate_publish(build_release(root, "v2-audit", [batch], spark=spark))
+    report = release["report"]
+    assert report["raw_count"] == 7
+    assert report["quarantine_count"] == 1
+    assert report["valid_count"] == 6
+    assert report["exact_duplicate_count"] == 1
+    assert report["accepted_count"] == 5
+    assert report["control_chars_removed_count"] == 1
+    assert report["low_chinese_ratio_count"] == 1
+    assert report["language_undetermined_count"] == 1
+    assert report["short_text_count"] == 5
+    rows = read_documents(release["directory"])
+    assert [row[0] for row in rows] == [f"wikipedia:zh:{key}" for key in ("01", "03", "04", "06", "07")]
+    assert rows[0][1] == "ABC Café"
+    for _, text, content_hash, split in rows:
+        assert content_hash == text_hash(text)
+        assert split == content_split(content_hash)
+    with duckdb.connect() as connection:
+        files = sorted(str(p) for p in (Path(release["directory"]) / "documents").glob("*.parquet"))
+        flags = dict(connection.execute("SELECT doc_id, quality_flags FROM read_parquet(?)", [files]).fetchall())
+    assert set(flags["wikipedia:zh:01"].split(",")) == {"short_text", "control_chars_removed", "low_chinese_ratio"}
+    assert set(flags["wikipedia:zh:04"].split(",")) == {"short_text", "language_undetermined"}
+    for key in ("03", "06", "07"):
+        assert flags[f"wikipedia:zh:{key}"] == "short_text"
+    with catalog(root) as connection:
+        metrics = dict(connection.execute("SELECT metric, value FROM quality_metrics WHERE run_id='v2-audit'").fetchall())
+    for metric in ("control_chars_removed_count", "low_chinese_ratio_count", "language_undetermined_count"):
+        assert metrics[metric] == report[metric]
+    assert read_ready(root, "v2-audit")["report"] == report
 
 
 @pytest.mark.parametrize("failure", ["before_rename", "after_rename", "before_commit", "after_commit"])

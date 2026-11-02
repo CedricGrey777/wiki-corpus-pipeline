@@ -33,7 +33,7 @@ def main(argv=None):
     audit = commands.add_parser("audit-near-duplicates")
     audit.add_argument("--release-id", required=True)
     demo = commands.add_parser("run-demo")
-    demo.add_argument("--release-id", default="synthetic-r001")
+    demo.add_argument("--release-id", default="synthetic-cli-v2")
     benchmark = commands.add_parser("benchmark")
     benchmark.add_argument("--input", required=True)
     benchmark.add_argument("--source-kind", choices=["wikimedia", "synthetic"], default="wikimedia")

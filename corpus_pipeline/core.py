@@ -15,7 +15,7 @@ import duckdb
 
 REVISION = "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592"
 SNAPSHOT = "20231101.zh"
-RECIPE = "recipe_v1"
+RECIPE = "recipe_v2"
 SHARDS = tuple(f"train-{i:05d}-of-00006.parquet" for i in range(6))
 SCOPES = {"full": None, "10k": 10_000, "100k": 100_000}
 KEY_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,149}$")

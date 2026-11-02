@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wiki-corpus-pipeline"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local, reproducible public-text curation and immutable dataset releases"
 requires-python = ">=3.11,<3.12"
 dependencies = ["pyspark[ml]==3.5.9", "numpy==1.26.4", "scipy==1.13.1", "duckdb==1.4.5", "pyarrow==20.0.0"]

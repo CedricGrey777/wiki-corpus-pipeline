@@ -1,0 +1,4 @@
+ Container wiki-corpus-pipeline-cli-run-dbcfa80fc915 Creating
+ Container wiki-corpus-pipeline-cli-run-dbcfa80fc915 Created
+.                                                                        [100%]
+1 passed, 14 deselected in 8.88s

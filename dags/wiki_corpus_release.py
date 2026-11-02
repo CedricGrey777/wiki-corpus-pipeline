@@ -21,7 +21,7 @@ with DAG(
         "source_kind": Param("synthetic", type="string", enum=["synthetic", "wikimedia"]),
         "shards": Param([SHARDS[2]], type="array", minItems=1, uniqueItems=True, items={"type": "string", "enum": list(SHARDS)}),
         "scope": Param("10k", type="string", enum=["10k", "100k", "full"]),
-        "release_id": Param("synthetic-r001", type="string", pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,149}$"),
+        "release_id": Param("synthetic-airflow-v2", type="string", pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,149}$"),
         "run_audit": Param(False, type="boolean"),
     },
     default_args={"retries": 1, "retry_delay": timedelta(seconds=30)},

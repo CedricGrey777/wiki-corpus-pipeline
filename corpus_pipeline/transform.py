@@ -9,12 +9,18 @@ from pyspark.sql import SparkSession, Window, functions as F
 from pyspark.sql.types import StringType
 
 
+WIDTH_TRANSLATION = {code: code - 0xFEE0 for code in range(0xFF01, 0xFF5F)}
+WIDTH_TRANSLATION[0x3000] = ord(" ")
+
+
 def normalize_text(text: str | None) -> str | None:
     if text is None:
         return None
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = unicodedata.normalize("NFC", text.translate(WIDTH_TRANSLATION))
+    text = "".join(char for char in text if unicodedata.category(char) != "Cc" or char in "\n\t")
     if not text.strip():
         return ""
-    text = unicodedata.normalize("NFC", text.replace("\r\n", "\n").replace("\r", "\n"))
     lines = [line.rstrip(" \t") for line in text.split("\n")]
     while lines and not lines[0]:
         lines.pop(0)
@@ -25,6 +31,28 @@ def normalize_text(text: str | None) -> str | None:
         if line or not output or output[-1]:
             output.append(line)
     return "\n".join(output)
+
+
+def text_audit_flags(raw_text: str | None, clean_text: str | None) -> str:
+    """Audit only; Han membership follows the Python runtime's Unicode database.
+
+    Count Unicode L* letters in the denominator and UCD-named CJK unified or
+    compatibility ideographs in the numerator, including supported extensions.
+    Han is shared across languages, so this is not a language classifier.
+    """
+    flags = []
+    # CR/CRLF become LF before removal, so newline normalization is not removal.
+    if any(unicodedata.category(char) == "Cc" and char not in "\r\n\t" for char in raw_text or ""):
+        flags.append("control_chars_removed")
+    letters = [char for char in clean_text or "" if unicodedata.category(char).startswith("L")]
+    if not letters:
+        flags.append("language_undetermined")
+    else:
+        han_count = sum(unicodedata.name(char, "").startswith(
+            ("CJK UNIFIED IDEOGRAPH-", "CJK COMPATIBILITY IDEOGRAPH-")) for char in letters)
+        if han_count * 2 < len(letters):
+            flags.append("low_chinese_ratio")
+    return ",".join(flags)
 
 
 def content_split(content_hash: str) -> str:
@@ -56,6 +84,7 @@ def clean_frame(frame, batch_id: str):
         raise ValueError("Source columns must all have string types")
     frame = frame.select(*required)
     clean = F.udf(normalize_text, StringType())
+    audit = F.udf(text_audit_flags, StringType())
     frame = frame.withColumn("clean_text", clean("text"))
     checks = [("missing_id", F.col("id").isNull() | (F.length(F.trim("id")) == 0)),
               ("missing_url", F.col("url").isNull() | (F.length(F.trim("url")) == 0)),
@@ -72,7 +101,8 @@ def clean_frame(frame, batch_id: str):
              .withColumn("source_record_hash", F.sha2(F.to_json(F.struct(*[F.col(c) for c in required])), 256))
              .withColumn("content_hash", F.sha2("clean_text", 256))
              .withColumn("repeated_line_ratio", repeated_ratio)
-             .withColumn("quality_flags", F.concat_ws(",", F.when(F.length("clean_text") < 100, F.lit("short_text")), F.when(F.length("clean_text") > 100_000, F.lit("long_text")), F.when(F.col("repeated_line_ratio") > 0.5, F.lit("repeated_lines"))))
+             .withColumn("audit_flags", audit("text", "clean_text"))
+             .withColumn("quality_flags", F.concat_ws(",", F.when(F.length("clean_text") < 100, F.lit("short_text")), F.when(F.length("clean_text") > 100_000, F.lit("long_text")), F.when(F.col("repeated_line_ratio") > 0.5, F.lit("repeated_lines")), F.when(F.col("audit_flags") != "", F.col("audit_flags"))))
              .select("batch_id", "doc_id", "url", "title", "clean_text", "content_hash", "source_record_hash", "quality_flags", "repeated_line_ratio"))
     return valid, quarantine
 

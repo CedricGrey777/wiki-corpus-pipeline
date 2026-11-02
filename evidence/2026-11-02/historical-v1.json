@@ -1,0 +1,202 @@
+{
+  "verified_on": "2026-11-02",
+  "evidence_kind": "existing_recipe_v1_manifest_and_catalog_verification",
+  "release": {
+    "identity": {
+      "batches": [
+        {
+          "batch_id": "wikimedia-train-00000-of-00006-full-recipe_v1",
+          "implementation_id": "90251f77625db14d6f2f7950eb98d6ca405a880126ddc73475e740a370fc27ff",
+          "recipe_version": "recipe_v1",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00000-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "853ddf4a138c792ad7386d6de831788f96326c03e1e3349f7a315498392e8b56"
+        },
+        {
+          "batch_id": "wikimedia-train-00001-of-00006-full-recipe_v1",
+          "implementation_id": "90251f77625db14d6f2f7950eb98d6ca405a880126ddc73475e740a370fc27ff",
+          "recipe_version": "recipe_v1",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00001-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "038b08e5aae38b5a1671794cee3fa0d4952c0d00fa0890a903d2de3f3fe5f703"
+        },
+        {
+          "batch_id": "wikimedia-train-00002-of-00006-full-recipe_v1",
+          "implementation_id": "90251f77625db14d6f2f7950eb98d6ca405a880126ddc73475e740a370fc27ff",
+          "recipe_version": "recipe_v1",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00002-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "ec8f6c0dd1418b8fcd454278fb4f2bc7cd0ce8312f29c80b672533942601338f"
+        },
+        {
+          "batch_id": "wikimedia-train-00003-of-00006-full-recipe_v1",
+          "implementation_id": "90251f77625db14d6f2f7950eb98d6ca405a880126ddc73475e740a370fc27ff",
+          "recipe_version": "recipe_v1",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00003-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "4884e4933fa91f46dc9bf711db8be07f368da59b8cfc2e00e895a65a3284cbb1"
+        },
+        {
+          "batch_id": "wikimedia-train-00004-of-00006-full-recipe_v1",
+          "implementation_id": "90251f77625db14d6f2f7950eb98d6ca405a880126ddc73475e740a370fc27ff",
+          "recipe_version": "recipe_v1",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00004-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "415a5cd235a359a009c6bd6d488c3d9ee81ed3220b9f33fd04214558bc5150cd"
+        },
+        {
+          "batch_id": "wikimedia-train-00005-of-00006-full-recipe_v1",
+          "implementation_id": "90251f77625db14d6f2f7950eb98d6ca405a880126ddc73475e740a370fc27ff",
+          "recipe_version": "recipe_v1",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00005-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "803ae27118b1daf9be4403b57b679b8ce065fbffdfdea0c33c517255c17478df"
+        }
+      ],
+      "deduplication": "normalized_text_equality",
+      "implementation_id": "90251f77625db14d6f2f7950eb98d6ca405a880126ddc73475e740a370fc27ff",
+      "recipe_version": "recipe_v1",
+      "split": "sha256_prefix_mod100_lt5_validation"
+    },
+    "release_id": "wiki-full-20260909",
+    "report": {
+      "accepted_count": 1379178,
+      "exact_duplicate_count": 5570,
+      "long_text_count": 14,
+      "quarantine_count": 0,
+      "raw_count": 1384748,
+      "repeated_lines_count": 1445,
+      "short_text_count": 226801,
+      "source_duplicate_count": 0,
+      "source_unique_count": 1384748,
+      "train_count": 1310799,
+      "valid_count": 1384748,
+      "validation_count": 68379
+    },
+    "directory": "/opt/airflow/data/releases/wiki-full-20260909"
+  },
+  "audit": {
+    "candidate_count": 16,
+    "changes_release": false,
+    "manual_review_count": 16,
+    "release_id": "wiki-full-20260909",
+    "sample_count": 2000,
+    "semantic_recall_measured": false,
+    "synthetic": {
+      "interpretation": "Synthetic perturbation detection only; not real-corpus semantic recall",
+      "negative_flagged": 0,
+      "negative_pairs": 20,
+      "pair_count": 40,
+      "positive_detected": 20,
+      "positive_pairs": 20,
+      "threshold": 0.8
+    }
+  },
+  "benchmark": {
+    "actual_rows": 100000,
+    "cache_control": "OS page cache is not flushed; fresh JVM per run",
+    "includes_jvm_startup_and_all_io": true,
+    "median_wall_seconds": {
+      "local[1]": 24.8680146089996,
+      "local[2]": 24.119611875999908
+    },
+    "memory_method": "sum of sampled Linux process-tree RSS every 0.2s; may double-count shared pages and miss short peaks",
+    "output_dir": "/opt/airflow/data/staging/benchmark-adff30e72bf9438599f039c2dfa5adde",
+    "requested_rows": 100000,
+    "runs": [
+      {
+        "accepted_count": 99998,
+        "iteration": 1,
+        "master": "local[1]",
+        "raw_count": 100000,
+        "sampled_process_tree_peak_rss_bytes": 3111567360,
+        "wall_seconds": 24.8680146089996
+      },
+      {
+        "accepted_count": 99998,
+        "iteration": 2,
+        "master": "local[1]",
+        "raw_count": 100000,
+        "sampled_process_tree_peak_rss_bytes": 2511572992,
+        "wall_seconds": 24.494304881000062
+      },
+      {
+        "accepted_count": 99998,
+        "iteration": 3,
+        "master": "local[1]",
+        "raw_count": 100000,
+        "sampled_process_tree_peak_rss_bytes": 2064146432,
+        "wall_seconds": 25.30766497500008
+      },
+      {
+        "accepted_count": 99998,
+        "iteration": 1,
+        "master": "local[2]",
+        "raw_count": 100000,
+        "sampled_process_tree_peak_rss_bytes": 2039758848,
+        "wall_seconds": 25.53498885099998
+      },
+      {
+        "accepted_count": 99998,
+        "iteration": 2,
+        "master": "local[2]",
+        "raw_count": 100000,
+        "sampled_process_tree_peak_rss_bytes": 2442178560,
+        "wall_seconds": 24.119611875999908
+      },
+      {
+        "accepted_count": 99998,
+        "iteration": 3,
+        "master": "local[2]",
+        "raw_count": 100000,
+        "sampled_process_tree_peak_rss_bytes": 2931073024,
+        "wall_seconds": 23.524183429000004
+      }
+    ],
+    "source_bytes": 126796358
+  },
+  "source_files": [
+    {
+      "name": "train-00000-of-00006.parquet",
+      "bytes": 587109027
+    },
+    {
+      "name": "train-00001-of-00006.parquet",
+      "bytes": 263629009
+    },
+    {
+      "name": "train-00002-of-00006.parquet",
+      "bytes": 126796358
+    },
+    {
+      "name": "train-00003-of-00006.parquet",
+      "bytes": 262039932
+    },
+    {
+      "name": "train-00004-of-00006.parquet",
+      "bytes": 256719920
+    },
+    {
+      "name": "train-00005-of-00006.parquet",
+      "bytes": 224856014
+    }
+  ]
+}

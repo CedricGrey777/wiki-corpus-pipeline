@@ -147,6 +147,10 @@ def validate_directory(directory: Path) -> dict:
         report["short_text_count"] = connection.execute("SELECT count(*) FROM docs WHERE contains(quality_flags,'short_text')").fetchone()[0]
         report["long_text_count"] = connection.execute("SELECT count(*) FROM docs WHERE contains(quality_flags,'long_text')").fetchone()[0]
         report["repeated_lines_count"] = connection.execute("SELECT count(*) FROM docs WHERE repeated_line_ratio>0.5").fetchone()[0]
+        for flag in ("control_chars_removed", "low_chinese_ratio", "language_undetermined"):
+            report[f"{flag}_count"] = connection.execute(
+                "SELECT count(*) FROM docs WHERE list_contains(string_split(quality_flags, ','), ?)", [flag]
+            ).fetchone()[0]
     equations = [report["raw_count"] == report["valid_count"] + report["quarantine_count"],
                  report["valid_count"] == report["source_unique_count"] + report["source_duplicate_count"],
                  report["source_unique_count"] == report["exact_duplicate_count"] + report["accepted_count"],

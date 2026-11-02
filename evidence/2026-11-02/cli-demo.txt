@@ -1,0 +1,82 @@
+ Container wiki-corpus-pipeline-cli-run-ef968df3459b Creating
+ Container wiki-corpus-pipeline-cli-run-ef968df3459b Created
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+26/11/02 07:19:28 WARN NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+
+[Stage 4:>                                                          (0 + 1) / 1]
+
+
+{
+  "release_id": "synthetic-cli-v2",
+  "status": "READY",
+  "report": {
+    "accepted_count": 4,
+    "exact_duplicate_count": 2,
+    "quarantine_count": 2,
+    "raw_count": 9,
+    "source_duplicate_count": 1,
+    "source_unique_count": 6,
+    "valid_count": 7,
+    "train_count": 4,
+    "validation_count": 0,
+    "short_text_count": 4,
+    "long_text_count": 0,
+    "repeated_lines_count": 0,
+    "control_chars_removed_count": 0,
+    "low_chinese_ratio_count": 0,
+    "language_undetermined_count": 0
+  },
+  "directory": "/tmp/corpus-verification/releases/synthetic-cli-v2"
+}
+{
+  "identity": {
+    "batches": [
+      {
+        "batch_id": "synthetic-synthetic-00-full-recipe_v2",
+        "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+        "recipe_version": "recipe_v2",
+        "revision": "synthetic-v1",
+        "scope": "full",
+        "snapshot": "synthetic",
+        "source_file": "synthetic-00.parquet",
+        "source_kind": "synthetic",
+        "source_sha256": "95bbfd8aa0dd9ef44d6972f5b2e2553d65a0b65a11397bb923e0c44179b918a3"
+      },
+      {
+        "batch_id": "synthetic-synthetic-01-full-recipe_v2",
+        "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+        "recipe_version": "recipe_v2",
+        "revision": "synthetic-v1",
+        "scope": "full",
+        "snapshot": "synthetic",
+        "source_file": "synthetic-01.parquet",
+        "source_kind": "synthetic",
+        "source_sha256": "017429df936c34864f4830aff9c56b63e12b6fa6e011cf1ca193ebe053482f57"
+      }
+    ],
+    "deduplication": "normalized_text_equality",
+    "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+    "recipe_version": "recipe_v2",
+    "split": "sha256_prefix_mod100_lt5_validation"
+  },
+  "release_id": "synthetic-cli-v2",
+  "report": {
+    "accepted_count": 4,
+    "control_chars_removed_count": 0,
+    "exact_duplicate_count": 2,
+    "language_undetermined_count": 0,
+    "long_text_count": 0,
+    "low_chinese_ratio_count": 0,
+    "quarantine_count": 2,
+    "raw_count": 9,
+    "repeated_lines_count": 0,
+    "short_text_count": 4,
+    "source_duplicate_count": 1,
+    "source_unique_count": 6,
+    "train_count": 4,
+    "valid_count": 7,
+    "validation_count": 0
+  },
+  "directory": "/tmp/corpus-verification/releases/synthetic-cli-v2"
+}
