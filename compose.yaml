@@ -1,0 +1,83 @@
+name: wiki-corpus-pipeline
+
+# Local demonstration credentials only. All services and volumes belong to this project.
+x-airflow: &airflow
+  build: .
+  image: wiki-corpus-pipeline:local
+  environment: &airflow-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__PARALLELISM: "1"
+    AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: "1"
+    AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG: "1"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+    AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:local-demo-only@postgres/airflow
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://api-server:8080/execution/
+    AIRFLOW__API_AUTH__JWT_SECRET: local-demo-only-not-a-production-secret-20260909
+    AIRFLOW__API__BASE_URL: http://localhost:18081
+    AIRFLOW__DAG_PROCESSOR__PARSING_PROCESSES: "1"
+    CORPUS_DATA_ROOT: /opt/airflow/data
+  volumes:
+    - corpus-data:/opt/airflow/data
+    - airflow-logs:/opt/airflow/logs
+  depends_on:
+    postgres:
+      condition: service_healthy
+    airflow-init:
+      condition: service_completed_successfully
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: local-demo-only
+      POSTGRES_DB: airflow
+    volumes:
+      - airflow-meta:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    mem_limit: 512m
+
+  airflow-init:
+    <<: *airflow
+    command: db migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 1g
+
+  api-server:
+    <<: *airflow
+    command: api-server --workers 1
+    ports:
+      - "127.0.0.1:18081:8080"
+    mem_limit: 1g
+
+  scheduler:
+    <<: *airflow
+    command: scheduler
+    mem_limit: 6g
+    cpus: 2
+
+  dag-processor:
+    <<: *airflow
+    command: dag-processor
+    mem_limit: 1g
+
+  cli:
+    <<: *airflow
+    profiles: [tools]
+    entrypoint: [python, -m, corpus_pipeline]
+    command: [--help]
+    mem_limit: 6g
+    cpus: 2
+
+volumes:
+  corpus-data:
+  airflow-logs:
+  airflow-meta:
