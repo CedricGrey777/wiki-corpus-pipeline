@@ -1,0 +1,4 @@
+ Container wiki-corpus-pipeline-cli-run-288b6540090e Creating
+ Container wiki-corpus-pipeline-cli-run-288b6540090e Created
+.................................                                        [100%]
+33 passed in 17.39s

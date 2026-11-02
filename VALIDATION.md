@@ -1,6 +1,76 @@
 # 实测记录
 
-## 2026-11-02：recipe_v2 实测
+## 2026-11-02：独立治理验收（当前）
+
+治理扩展使用独立的 `corpus_governance` 包读取已有 READY 发布，原 `corpus_pipeline` 清洗与发布代码保持不变。新增比较、抽样和复核产物写入独立目录，发布正文及既有版本身份不覆盖。操作入口见 [治理说明](docs/GOVERNANCE.md) 与 [版本比较](docs/COMPARISON.md)，面试展示顺序见 [SHOWCASE](docs/SHOWCASE.md)。
+
+[release-integrity.json](evidence/2026-11-02-governance/release-integrity.json) 确认当前流水线实现指纹仍为 `14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9`，v1/v2 发布均为 READY。治理能力以 `main` 增量交付，不移动既有 `v0.2.0` 或 `baseline-v1` 标签；本地导出的正文上下文和标签 CSV 留在已忽略的 `data/reviews/`，公开证据只含聚合结果。
+
+| 验证项 | 实测结果 | 证据 |
+|---|---|---|
+| 治理扩展聚焦测试 | **33 passed in 17.39s** | [focused-tests.txt](evidence/2026-11-02-governance/focused-tests.txt) |
+| CLI 成功退出码与命令工作流 | **2 passed in 0.89s** | [cli-tests.txt](evidence/2026-11-02-governance/cli-tests.txt) |
+| 当前完整测试，含真实 Spark | **68 passed in 29.75s** | [tests.txt](evidence/2026-11-02-governance/tests.txt) |
+
+新增测试覆盖候选 train/validation 分类、共同文章正文与实际划分迁移、缺失历史指标、CSV 复核身份及标签校验、明确结论与 `uncertain` 分母、按规则分层的稳定有界抽样、READY 门槛及正文不进入公开汇总。
+
+### 真实近重复审计与当前复核进度
+
+对 `wiki-full-v2-20261102` 的 100–2000 字符正文按既定顺序取 **2,000 篇**，得到 **16 对** Jaccard ≥ 0.8 的候选，拆分如下。证据见 [near-audit.json](evidence/2026-11-02-governance/near-audit.json) 与 [near-review.json](evidence/2026-11-02-governance/near-review.json)。
+
+| 候选集合 | 候选对数 | 当前状态 |
+|---|---:|---|
+| train / train | 12 | 待人工复核 |
+| validation / validation | 0 | 当前有限样本未生成该类候选 |
+| 跨 train / validation | 4 | 4 对全部待人工复核，尚非已确认泄漏 |
+| 合计 | 16 | 已人工复核 0，待复核 16 |
+
+全部队列及跨集合队列的明确人工结论数均为 0，确认比例均为 `null`。40 对固定合成扰动测试正例检出 20/20、负例误报 0/20；这不构成真实语料人工准确率或全库召回率。此次独立审计的 identity 关联原 READY 发布，`changes_release=false`。
+
+### 真实质量规则分层样本
+
+每条风险规则分别从命中与未命中层按固定顺序取最多 20 条，实际生成 **175 条文章—规则评审任务，覆盖 94 篇独立文章**。证据见 [quality-sample.json](evidence/2026-11-02-governance/quality-sample.json) 和 [quality-review.json](evidence/2026-11-02-governance/quality-review.json)。
+
+| 规则 | 命中层样本 | 未命中层样本 |
+|---|---:|---:|
+| 短文本 | 20 | 20 |
+| 长文本 | 14（该层全量） | 20 |
+| 重复行 | 20 | 20 |
+| 低中文占比 | 20 | 20 |
+| 无字母内容 | 1（该层全量） | 20 |
+| 评审任务合计 | 75 | 100 |
+
+175 条任务全部待标注，已人工复核 0；各层的明确问题比例均为 `null`，总体不计算跨规则混合比例。同一篇文章可被多个规则选中，175 不是独立文章数量。控制字符清理是已发生的处理事件，不进入这五条风险评审规则。
+
+已在真实版本上运行队列生成、CSV 导出与未标注汇总，明确人工标签的导入校验及统计通过合成测试验证；真实人工评估尚未完成。本节不报告人工准确率或质量改善数字。
+
+### 真实 v1→v2 版本差异
+
+[version-comparison.json](evidence/2026-11-02-governance/version-comparison.json) 比较 `wiki-full-20260909` 与 `wiki-full-v2-20261102`，来源 revision、manifest 中的文件 SHA-256 和 scope 均一致；这是读取已保存来源身份的比较，没有重新散列原始文件。
+
+| 统计项 | 实际文章数 |
+|---|---:|
+| 左版／右版／共同文章 ID | 均为 1,379,178 |
+| 代表文章新增／移除 | 均为 0 |
+| 共同 ID 正文变化 | 1,364,883 |
+| 共同 ID 正文不变 | 14,295 |
+| train → train | 1,245,597 |
+| train → validation | 65,202 |
+| validation → train | 64,243 |
+| validation → validation | 4,136 |
+
+两个方向合计 **129,445 篇**发生集合迁移；validation 净增加 **959 篇**，是 65,202 与 64,243 相抵的结果，不是迁移文章总量。正文变化来自规则差异，不证明语料质量或模型收益提升；相同去重总数也不能说明正文或划分未变。
+
+### 结果解释边界
+
+- 近重复候选按同集合与跨集合拆分；跨集合候选不是已证实泄漏，人工确认比例仅在明确正反判断的分母上计算。
+- 质量评审按 5 条风险规则分别抽取命中／未命中层；报告各层实际总体量、样本量、待处理和明确结论数量。每行是文章—规则判断，不能把行数当独立文章数，也不计算跨规则混合问题比例。
+- 版本比较按共同 `doc_id` 统计正文变化与 train↔validation 的两个迁移方向；净 split 数量差不能代表实际迁移数量，旧版未测指标记为 `null`。
+- 公开证据仅保留身份与聚合统计；正文、文本对、实际标签和备注留在本地工作包。没有明确人工判断时，相应比例为 `null`。
+
+## 2026-11-02：recipe_v2 首次发布实测
+
+本节保留独立治理扩展前的 35 项测试及全量发布证据；当前源码的 68 项测试见上节。
 
 本次固定来源 revision 为 `5428a5d9ebb8d68732fc1227ebc5e8d5cec28592`，完整处理 `20231101.zh` 六个分片。来源文件 SHA-256 与 v1 一致，原有 READY 版本在此次运行后保持不变；两项核验结果均记录在 [v2 发布与审计证据](evidence/2026-11-02/release-v2.json) 中。源码版本为 `41a698c`，发布 ID 为 `wiki-full-v2-20261102`。
 

@@ -1,0 +1,125 @@
+{
+  "audit_identity": {
+    "audit_id": "audit-wiki-full-v2-20261102-125db8f305374be79f4639dea83772b6",
+    "matching": {
+      "character_ngram": 5,
+      "hashing_tf_features": 262144,
+      "min_exact_jaccard": 0.8,
+      "minhash_tables": 8,
+      "seed": 42
+    },
+    "release_id": "wiki-full-v2-20261102",
+    "review_limit": 50,
+    "review_order": [
+      "jaccard_desc",
+      "left_id",
+      "right_id"
+    ],
+    "sampling": {
+      "max_chars": 2000,
+      "max_documents": 2000,
+      "min_chars": 100,
+      "order": [
+        "sha256(doc_id)",
+        "doc_id"
+      ],
+      "scope": "length_filtered_deterministic_sample"
+    },
+    "source_release_identity": {
+      "batches": [
+        {
+          "batch_id": "wikimedia-train-00000-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00000-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "853ddf4a138c792ad7386d6de831788f96326c03e1e3349f7a315498392e8b56"
+        },
+        {
+          "batch_id": "wikimedia-train-00001-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00001-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "038b08e5aae38b5a1671794cee3fa0d4952c0d00fa0890a903d2de3f3fe5f703"
+        },
+        {
+          "batch_id": "wikimedia-train-00002-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00002-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "ec8f6c0dd1418b8fcd454278fb4f2bc7cd0ce8312f29c80b672533942601338f"
+        },
+        {
+          "batch_id": "wikimedia-train-00003-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00003-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "4884e4933fa91f46dc9bf711db8be07f368da59b8cfc2e00e895a65a3284cbb1"
+        },
+        {
+          "batch_id": "wikimedia-train-00004-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00004-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "415a5cd235a359a009c6bd6d488c3d9ee81ed3220b9f33fd04214558bc5150cd"
+        },
+        {
+          "batch_id": "wikimedia-train-00005-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00005-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "803ae27118b1daf9be4403b57b679b8ce065fbffdfdea0c33c517255c17478df"
+        }
+      ],
+      "deduplication": "normalized_text_equality",
+      "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+      "recipe_version": "recipe_v2",
+      "split": "sha256_prefix_mod100_lt5_validation"
+    }
+  },
+  "candidate_count": 16,
+  "decisions": {
+    "queue_count": 16,
+    "pending_count": 16,
+    "reviewed_count": 0,
+    "adjudicated_count": 0,
+    "near_duplicate_count": 0,
+    "distinct_count": 0,
+    "uncertain_count": 0,
+    "positive_fraction_among_adjudicated": null
+  },
+  "cross_split_decisions": {
+    "queue_count": 4,
+    "pending_count": 4,
+    "reviewed_count": 0,
+    "adjudicated_count": 0,
+    "near_duplicate_count": 0,
+    "distinct_count": 0,
+    "uncertain_count": 0,
+    "positive_fraction_among_adjudicated": null
+  },
+  "interpretation": "Only supplied human labels are counted. Candidate-review agreement is not full-corpus recall; uncertain rows are excluded from the fraction."
+}

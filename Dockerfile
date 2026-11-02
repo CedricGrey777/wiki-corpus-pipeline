@@ -10,6 +10,7 @@ USER airflow
 RUN pip install --no-cache-dir apache-airflow==3.3.1 'pyspark[ml]==3.5.9' numpy==1.26.4 scipy==1.13.1 duckdb==1.4.5 pyarrow==20.0.0 pytest==8.3.5
 COPY --chown=airflow:root pyproject.toml /opt/corpus/pyproject.toml
 COPY --chown=airflow:root corpus_pipeline /opt/corpus/corpus_pipeline
+COPY --chown=airflow:root corpus_governance /opt/corpus/corpus_governance
 COPY --chown=airflow:root dags /opt/airflow/dags
 COPY --chown=airflow:root tests /opt/corpus/tests
 ENV PYTHONPATH=/opt/corpus

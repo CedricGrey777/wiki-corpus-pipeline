@@ -3,9 +3,9 @@ name: CI
 on:
   push:
     branches: ['**']
-    paths: ['corpus_pipeline/**', 'tests/**', 'dags/**', 'pyproject.toml', 'Dockerfile', '.dockerignore', 'compose.yaml', '.github/workflows/**']
+    paths: ['corpus_pipeline/**', 'corpus_governance/**', 'tests/**', 'dags/**', 'pyproject.toml', 'Dockerfile', '.dockerignore', 'compose.yaml', '.github/workflows/**']
   pull_request:
-    paths: ['corpus_pipeline/**', 'tests/**', 'dags/**', 'pyproject.toml', 'Dockerfile', '.dockerignore', 'compose.yaml', '.github/workflows/**']
+    paths: ['corpus_pipeline/**', 'corpus_governance/**', 'tests/**', 'dags/**', 'pyproject.toml', 'Dockerfile', '.dockerignore', 'compose.yaml', '.github/workflows/**']
   workflow_dispatch:
 
 permissions:

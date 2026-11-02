@@ -14,9 +14,10 @@ test = ["pytest==8.3.5"]
 
 [project.scripts]
 corpus-pipeline = "corpus_pipeline.cli:main"
+corpus-governance = "corpus_governance.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["corpus_pipeline*"]
+include = ["corpus_pipeline*", "corpus_governance*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

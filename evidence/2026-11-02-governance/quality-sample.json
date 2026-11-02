@@ -1,0 +1,155 @@
+{
+  "review_identity": {
+    "review_id": "quality-review-wiki-full-v2-20261102-d762c7d6d9734accab78f1ea6bd4f5ed",
+    "release_id": "wiki-full-v2-20261102",
+    "source_release_identity": {
+      "batches": [
+        {
+          "batch_id": "wikimedia-train-00000-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00000-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "853ddf4a138c792ad7386d6de831788f96326c03e1e3349f7a315498392e8b56"
+        },
+        {
+          "batch_id": "wikimedia-train-00001-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00001-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "038b08e5aae38b5a1671794cee3fa0d4952c0d00fa0890a903d2de3f3fe5f703"
+        },
+        {
+          "batch_id": "wikimedia-train-00002-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00002-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "ec8f6c0dd1418b8fcd454278fb4f2bc7cd0ce8312f29c80b672533942601338f"
+        },
+        {
+          "batch_id": "wikimedia-train-00003-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00003-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "4884e4933fa91f46dc9bf711db8be07f368da59b8cfc2e00e895a65a3284cbb1"
+        },
+        {
+          "batch_id": "wikimedia-train-00004-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00004-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "415a5cd235a359a009c6bd6d488c3d9ee81ed3220b9f33fd04214558bc5150cd"
+        },
+        {
+          "batch_id": "wikimedia-train-00005-of-00006-full-recipe_v2",
+          "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+          "recipe_version": "recipe_v2",
+          "revision": "5428a5d9ebb8d68732fc1227ebc5e8d5cec28592",
+          "scope": "full",
+          "snapshot": "20231101.zh",
+          "source_file": "train-00005-of-00006.parquet",
+          "source_kind": "wikimedia",
+          "source_sha256": "803ae27118b1daf9be4403b57b679b8ce065fbffdfdea0c33c517255c17478df"
+        }
+      ],
+      "deduplication": "normalized_text_equality",
+      "implementation_id": "14acce8ae92a1d9c65550075d4f59a68bba9b4816da6d924b02798fd1c22e0e9",
+      "recipe_version": "recipe_v2",
+      "split": "sha256_prefix_mod100_lt5_validation"
+    },
+    "sampling": "For each rule, independently take up to N flagged and N unflagged articles ordered by SHA256(doc_id), doc_id.",
+    "per_stratum": 20,
+    "rules": {
+      "short_text": "Does the article lack enough standalone context? Short length alone is not an issue.",
+      "long_text": "Does excessive padding or irrelevant repetition impair the article? Long length alone is not an issue.",
+      "repeated_lines": "Are repeated lines redundant noise rather than intentional structure?",
+      "low_chinese_ratio": "Is this article unsuitable for a primarily Chinese-language text collection? Mixed language is not automatically an issue.",
+      "language_undetermined": "Does the absence of letter content make the article unsuitable as language-training text?"
+    }
+  },
+  "queue_count": 175,
+  "unique_article_count": 94,
+  "strata": [
+    {
+      "rule": "short_text",
+      "flagged": "true",
+      "population_count": 226801,
+      "sample_count": 20
+    },
+    {
+      "rule": "short_text",
+      "flagged": "false",
+      "population_count": 1152377,
+      "sample_count": 20
+    },
+    {
+      "rule": "long_text",
+      "flagged": "true",
+      "population_count": 14,
+      "sample_count": 14
+    },
+    {
+      "rule": "long_text",
+      "flagged": "false",
+      "population_count": 1379164,
+      "sample_count": 20
+    },
+    {
+      "rule": "repeated_lines",
+      "flagged": "true",
+      "population_count": 1447,
+      "sample_count": 20
+    },
+    {
+      "rule": "repeated_lines",
+      "flagged": "false",
+      "population_count": 1377731,
+      "sample_count": 20
+    },
+    {
+      "rule": "low_chinese_ratio",
+      "flagged": "true",
+      "population_count": 66907,
+      "sample_count": 20
+    },
+    {
+      "rule": "low_chinese_ratio",
+      "flagged": "false",
+      "population_count": 1312271,
+      "sample_count": 20
+    },
+    {
+      "rule": "language_undetermined",
+      "flagged": "true",
+      "population_count": 1,
+      "sample_count": 1
+    },
+    {
+      "rule": "language_undetermined",
+      "flagged": "false",
+      "population_count": 1379177,
+      "sample_count": 20
+    }
+  ],
+  "interpretation": "Rows are article-rule assessments, not distinct articles. Control-character removal is a processing event and is not scored as a quality defect. No labels have been inferred.",
+  "output_dir": "/opt/airflow/data/staging/quality-review-wiki-full-v2-20261102-d762c7d6d9734accab78f1ea6bd4f5ed"
+}

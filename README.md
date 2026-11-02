@@ -8,7 +8,11 @@
 
 **业务产物是可追溯的数据版本，不是聊天应用，也不等于已经证明提升了模型质量。** 本项目与其他项目使用独立目录、DuckDB、Docker 网络及数据卷。
 
-当前实现为 `0.2.0 / recipe_v2`。2026-11-02 通过 Airflow 完成六分片全量运行：处理 **1,384,748** 条输入，移除 **5,570** 条重复正文，发布 **1,379,178** 篇文章为 READY；**35 项**完整测试通过，抽样 2,000 篇得到 **16 对待人工复核候选**。具体环境、统计口径与聚合证据见 [实测记录](VALIDATION.md)及 [v2 发布报告](evidence/2026-11-02/release-v2.json)。
+当前实现为 `0.2.0 / recipe_v2`，含独立治理扩展，**68 项**完整测试通过。2026-11-02 通过 Airflow 完成六分片全量运行：处理 **1,384,748** 条输入，移除 **5,570** 条重复正文，发布 **1,379,178** 篇文章为 READY；首次全量运行的原始审计抽样 2,000 篇，得到 **16 对待人工复核候选**。具体环境、统计口径与聚合证据见 [实测记录](VALIDATION.md)及 [v2 发布报告](evidence/2026-11-02/release-v2.json)。
+
+面试展示入口见 [项目展示与演示路径](docs/SHOWCASE.md)，人工复核操作见 [治理说明](docs/GOVERNANCE.md)，按文章 ID 核对规则升级影响见 [版本比较](docs/COMPARISON.md)。
+
+新增的独立治理入口随 `main` 分支提供；原 `v0.2.0` 与 `baseline-v1` 标签保持原指向。需要当前治理工具时使用 `main`，需要复现历史源码时使用对应标签。
 
 实测记录按规则版本区分当前与历史结果。虽然 v2 与 v1 的重复正文总数相同，规范化正文及 train/validation 划分已经变化，不能据数量相同推断清洗没有生效。旧版源码保存在 [`baseline-v1`](https://github.com/CedricGrey777/wiki-corpus-pipeline/tree/baseline-v1) 标签。
 
@@ -152,6 +156,20 @@ DuckDB保存 `batches`、`releases`、`quality_metrics`。正文、隔离记录�
 
 `candidate_pairs` 留在本地；`manual_review.csv` 至多50对，`human_label/notes`由候选人填写。阈值0.8是审计起点，不是自动删除规则。另有20对轻微扰动、20对无关文本的合成测试；合成检出结果与人工核验结果分开解释。没有测量全语料真实召回率，也不对已发布数据做任何近重复删除。
 
+### 跨集合审计与人工复核
+
+推荐使用独立的 `python -m corpus_governance` 入口：读取已有 READY 版本，统计同集合／跨 train-validation 的近重复候选，生成本地正文上下文和 CSV 标签模板，再汇总明确的人工判断；还支持对 5 个风险规则分别抽取命中与未命中样本。完整命令和标签口径见 [治理与人工复核操作说明](docs/GOVERNANCE.md)。
+
+原 `python -m corpus_pipeline audit-near-duplicates` 保留原始审计行为。独立治理入口不改变原流水线的实现指纹和已发布正文，标签与正文上下文只保存在本地数据目录；没有明确人工结论时，近重复及各质量分层的比例为 `null`，不能声称已经完成人工质量评估。跨集合候选尚不等于已确认泄漏，各规则命中／未命中层的人工问题比例不能外推成全库准确率。
+
+[发布完整性证据](evidence/2026-11-02-governance/release-integrity.json) 确认原流水线实现指纹仍与 v2 发布身份一致，v1 与 v2 均保持 READY。导出的正文上下文和 CSV 工作包仅留在已忽略的本地 `data/reviews/` 中，不进入公开文档或 Git。
+
+本次独立治理实测从 2,000 篇样本得到 **16 对候选：12 对 train/train、0 对 validation/validation、4 对跨集合**；16 对均待人工复核。五项规则的双层抽样生成 **175 条文章—规则评审任务，覆盖 94 篇独立文章**，当前全部待标注。真实版本的队列生成、CSV 导出和未标注汇总已运行；明确人工标签导入与统计由合成测试验证，真实人工评估尚未完成。证据见 [近重复审计](evidence/2026-11-02-governance/near-audit.json)、[近重复复核进度](evidence/2026-11-02-governance/near-review.json)、[质量分层样本](evidence/2026-11-02-governance/quality-sample.json)和 [质量复核进度](evidence/2026-11-02-governance/quality-review.json)。
+
+版本比较使用 DuckDB 按共同 `doc_id` 比较 `clean_text` 与 split，分别报告 train→validation、validation→train 以及代表文章集合增减。实际迁移文章数是两个方向之和，不能以 train 或 validation 总量的净变化代替；旧版未测质量指标保留 `null`。
+
+真实 v1→v2 比较中，两版 1,379,178 个文章 ID 全部对应；1,364,883 篇正文发生规则变化，**129,445 篇实际跨集合迁移**，而 validation 净增仅 **959 篇**。这些是规则与划分的变化，不能直接解释为质量提升。完整双向计数及来源核对见 [版本比较实例](docs/COMPARISON.md) 和 [聚合证据](evidence/2026-11-02-governance/version-comparison.json)。
+
 ## Airflow：参数化的实际阶段
 
 ```powershell
@@ -185,6 +203,8 @@ docker compose run --rm --no-deps --entrypoint python cli -m pytest -q
 ```
 
 覆盖：有限宽度转换、控制字符与保留字符、缩进/NFC、清洗幂等、语言阈值与无字母文本、标记不删文、缺字段隔离、哈希碰撞不能合并不同正文、跨批冲突、清洗复用、版本隔离与旧 READY 读取、改名/事务边界失败恢复、READY 消费门槛、40 对真实 Spark MinHash 合成测试、物理行序颠倒但 10k 样本不变。
+
+独立治理扩展的聚焦测试 **33 项**、当前完整测试 **68 项**均通过，新增覆盖候选 split 分类、实际文章迁移、未测指标的 `null`、CSV 身份及标签校验、人工不确定结论、稳定分层抽样和公开汇总的正文隔离。首次 v2 发布时的 35 项结果作为历史记录保留，当前测试日志见 [治理验收](VALIDATION.md)。
 
 [GitHub Actions](https://github.com/CedricGrey777/wiki-corpus-pipeline/actions/workflows/ci.yml) 在分支 push 或 pull request 涉及源码、测试、DAG、依赖配置、Docker 构建配置或工作流时触发，也支持手动触发。仅修改文档或证据不会自动重跑。工作流使用 Ubuntu 24.04 构建同一 Docker 镜像，执行聚焦/完整测试及独立临时目录中的 CLI 演示与 READY 检查。CI 仅使用合成数据，不下载 Wikipedia，也不运行全量性能实验；下载镜像和安装依赖仍需要网络。
 
